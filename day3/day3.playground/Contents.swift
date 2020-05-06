@@ -6,7 +6,7 @@ func makePathFromCommands(commandList: Array<Substring.SubSequence>)->Array<(Int
         var tempCommand = String(command)
         let movement: Character = tempCommand.remove(at: tempCommand.startIndex)
         let unit = Int(tempCommand)!
-       print("\(movement) \(unit)")
+//       print("\(movement) \(unit)")
         var coordinateMovement: (Int, Int) = (0,0)
         switch movement{
         case "U":
@@ -28,12 +28,59 @@ func makePathFromCommands(commandList: Array<Substring.SubSequence>)->Array<(Int
         previous_movement.1 += coordinateMovement.1
         path.append(previous_movement)
     }
-    
+//    print (path)
     return path
 }
 
-func makeIntersectionsFromPaths(commandList: Array<Array<(Int, Int)>>)->Array<(Int,Int)>{
-    var intersections:Array<(Int,Int)> = []
+func isIntersection(firstStart: (Int,Int), firstEnd: (Int,Int), secondStart: (Int,Int), secondEnd: (Int,Int)) ->Bool{
+    var result = false
+    
+    if(((secondStart.0 < firstEnd.0 && secondEnd.0 > firstEnd.0) || (secondStart.0 > firstEnd.0 && secondEnd.0 < firstEnd.0)) &&
+        ((secondStart.1 < firstEnd.1 && secondStart.1 > firstStart.1) || (secondStart.1 > firstEnd.1 && secondStart.1 < firstStart.1))){
+        result = true
+    }
+    return result
+}
+
+func getLineIntersections(startPoint: (Int, Int), endPoint: (Int, Int), pathList: Array<(Int, Int)>) ->Array<Int> {
+    var intersection: Array<Int> = []
+    let change = startPoint.0 - endPoint.0 != 0
+    
+    for i in 1..<pathList.count{
+        let pathStartPoint = pathList[i-1]
+        let pathEndPoint = pathList[i]
+        let pathchange = pathStartPoint.0 - pathEndPoint.0 != 0
+        if (change != pathchange){
+                if(change){
+                    if (isIntersection(firstStart: pathStartPoint, firstEnd: pathEndPoint, secondStart: startPoint, secondEnd: endPoint)){
+//                        print("\(startPoint)\(endPoint) \(pathStartPoint)\(pathEndPoint) Intersection ", terminator: "")
+//                        print("(\(pathEndPoint.0),\(startPoint.1))")
+                        intersection.append((abs(pathEndPoint.0)+abs(startPoint.1)))
+//                        print("\(abs(pathEndPoint.0)+abs(startPoint.1))")
+                    }
+                }
+                else{
+                    if(isIntersection(firstStart: startPoint, firstEnd: endPoint, secondStart: pathStartPoint, secondEnd: pathEndPoint)){
+//                        print("\(startPoint)\(endPoint) \(pathStartPoint)\(pathEndPoint) Intersection ", terminator: "")
+//                        print("(\(startPoint.0),\(pathEndPoint.1))")
+                        intersection.append((abs(startPoint.0)+abs(pathEndPoint.1)))
+//                        print("\(abs(pathEndPoint.1)+abs(startPoint.0))")
+                    }
+                }
+        }
+    }
+    
+    return intersection
+}
+
+func makeIntersectionsFromPaths(commandList: Array<Array<(Int, Int)>>)->Array<Int>{
+    var intersections:Array<Int> = []
+    
+    for i in 1..<commandList[0].count{
+        let startPoint = commandList[0][i-1]
+        let endPoint = commandList[0][i]
+        intersections.append(contentsOf: getLineIntersections(startPoint: startPoint, endPoint: endPoint, pathList: commandList[1]))
+    }
     
     return intersections
 }
@@ -64,7 +111,7 @@ for i in 0..<2{
 }
 
 //Find the intersections between the different paths
-
-
-print(path[0])
-var intersections = [(0,0)]
+var intersections = makeIntersectionsFromPaths(commandList: path)
+intersections = intersections.sorted()
+print(intersections)
+print("Finished")
