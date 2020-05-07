@@ -4,17 +4,20 @@ func validPassword(numStr: String)->Bool{
     var ascendingOnly = true
     var pair = false
     
-    for i in 1..<numStr.count{
-        let firstIndex = numStr.index(numStr.startIndex, offsetBy: i-1)
-        let secondIndex = numStr.index(numStr.startIndex, offsetBy: i)
-        let first: Int = numStr[firstIndex].wholeNumberValue!
-        let second: Int = numStr[secondIndex].wholeNumberValue!
-        if (ascendingOnly && first > second){
-            ascendingOnly = false
-            break
-        }
-        if (!pair && first == second){
-            pair = true
+    let sortedNumStr = numStr.sorted()
+    if(String(sortedNumStr) != numStr){
+        ascendingOnly = false
+    }
+    
+    if (ascendingOnly == true){
+        for i in 1..<numStr.count{
+            let firstIndex = numStr.index(numStr.startIndex, offsetBy: i-1)
+            let secondIndex = numStr.index(numStr.startIndex, offsetBy: i)
+            let first: Int = numStr[firstIndex].wholeNumberValue!
+            let second: Int = numStr[secondIndex].wholeNumberValue!
+            if (!pair && first == second){
+                pair = true
+            }
         }
     }
     
